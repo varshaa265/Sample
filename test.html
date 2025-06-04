@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Test model</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="logo-container">
+        <img class="logo" src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+    </div>
+    <div class="container">
+        <h1>Upload model and dataset for testing</h1>
+        <form action="/test" method="post" enctype="multipart/form-data">
+            <label for="model-file">Choose model file (.keras):</label>
+            <input type="file" name="model_file" id="model-file" accept=".keras" required>
+            <br><br>
+            <label for="dataset">Choose dataset (.zip):</label>
+            <input type="file" name="dataset_zip" id="dataset" accept=".zip" required>
+            <br><br>
+            <button type="submit">Upload and Test</button>
+        </form>
+
+        {% if show_results %}
+            <h2>Test Results</h2>
+            <h3>Accuracy: {{ accuracy }}</h3>
+
+            <h3>Confusion Matrix</h3>
+            <div class="matrix-container">
+                <table class="confusion-matrix">
+                    <tr>
+                        <th></th>
+                        {% for label in class_labels %}
+                        <th>Predicted: {{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for i, row in confusion_matrix %}
+                    <tr>
+                        <th>Actual: {{ class_labels[i] }}</th>
+                        {% for value in row %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <h3>Classification Report</h3>
+            <table class="classification-report">
+                <tr>
+                    <th>Class</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>Support</th>
+                </tr>
+                {% for label in class_labels %}
+                <tr>
+                    <td>{{ label }}</td>
+                    <td>{{ "%.2f"|format(classification_report[label]['precision']) }}</td>
+                    <td>{{ "%.2f"|format(classification_report[label]['recall']) }}</td>
+                    <td>{{ "%.2f"|format(classification_report[label]['f1-score']) }}</td>
+                    <td>{{ classification_report[label]['support'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+        <form action="/predict" method="get">
+            <button type="submit">Go to prediction</button>
+        </form>
+    </div>
+</body>
+</html>
